@@ -5,7 +5,7 @@
  *      Author: huy
  */
 #include"trie.h"
-
+#include"system.h"
 int main(){
 	trie root=trie();
 
