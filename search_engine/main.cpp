@@ -4,11 +4,12 @@
  *  Created on: Jul 26, 2019
  *      Author: huy
  */
-#include"trie.h"
-#include"system.h"
+#include"System.h"
 int main(){
-	trie root=trie();
-
+	System SYSTEM;
+	SYSTEM.get_files_name();
+	SYSTEM.load_stop_word();
+	SYSTEM.build_trie();
 	return 0;
 }
 

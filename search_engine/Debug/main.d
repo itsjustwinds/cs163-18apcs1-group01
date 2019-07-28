@@ -1,5 +1,5 @@
-main.o: ../main.cpp ../trie.h ../system.h
+main.o: ../main.cpp ../System.h ../trie.h
+
+../System.h:
 
 ../trie.h:
-
-../system.h:
