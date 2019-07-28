@@ -28,7 +28,7 @@ public:
 	void getNode(int id,trie* &Node);
 	vector<string > get_all_files();
 	vector<string > get_files_from_word(string S);
-	int check_link(string s);
+	int check_link(string s);	
 };
 
 

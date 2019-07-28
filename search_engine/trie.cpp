@@ -56,7 +56,7 @@ vector<string > trie::get_files_from_word(string S){
 	return New->get_files_from_word(S);
 }
 
-int trie::check_link(string s){
+int trie::check_link(string s) {
 	for (int i=0;i<(int)files.size();++i)
 		if (s==files[i]) return 1;
 	return 0;
