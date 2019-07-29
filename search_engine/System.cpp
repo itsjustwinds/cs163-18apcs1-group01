@@ -42,13 +42,51 @@ trie* System::get_root() {
 	return root;
 }
 
+void System::Find_keyword(ifstream &fin, string key) {
+	string read; cout << "...";
+	while (!fin.eof()) {
+		getline(fin, read);
+		string str = read;
+		for (int i = 0; i < (int) read.size(); i++)
+			if (read[i] >= 'A' && read[i] <= 'Z') read[i] = char(read[i] - 'A' + 'a');
+		int pos = read.find(key);
+		if (pos != -1) {
+			if (pos < 100) pos = 0; else pos = pos - 100;
+			for (int w = pos; (w < pos + 200) && (w < (int)str.size()); w++)
+				cout << str[w];
+			break;
+		}
+	}
+	cout << "..." << endl;
+}
+
+void System::Print(string filename, string key) {
+	ifstream fin;
+	fin.open("data/Search Engine-Data/" + filename);
+	string Title;
+	getline(fin, Title);
+	cout << Title << endl;
+	Find_keyword(fin, key);
+	fin.close();
+}
+
 void change(string &S,int is_query){
+	if (!is_query){
+	for (int i=0;i<(int)S.size();++i)
+	if (S[i]=='$'){
+		while(S[0]!='$') S.erase(S.begin());
+		while(S.size()&&(S.back()>='0'&&S.back()<='9')==0)
+			S.pop_back();
+		return ;
+	}
+	}
 	string tmp=S;
 	S="";
 	for (int i=0;i<(int)tmp.size();++i){
 		int ok=0;
 		if (tmp[i]>='a'&&tmp[i]<='z') ok=1;
 		if (tmp[i]>='A'&&tmp[i]<='Z') ok=1;
+		if (tmp[i]>='0'&&tmp[i]<='9') ok=1;
 		if (tmp[i]=='#'||tmp[i]=='$'||tmp[i]=='-') ok=1;
 		if (is_query){
 			if (tmp[i]=='+'||tmp[i]=='-') ok=1;
@@ -335,7 +373,56 @@ void System::process_type(string s) {
 }
 
 void System::process_a_price() {
-
+	string query=searchString;
+	string price="";
+	vector<string > words;
+	for (int i=0;i<(int)query.size();++i){
+		if (query[i]!='$') continue;
+		for (int j=i;j<(int)query.size();++j){
+			if (query[j]==' ') break;
+			price+=query[j];
+		}
+		break;
+	}
+	query=" "+query;
+	for (int i=0;i<(int)query.size();++i){
+		if (query[i]==' ') words.push_back("");
+		if(query[i]=='$'){
+			words.pop_back();
+			++i;
+			while(i<(int)query.size()&&query[i]>='0'&&query[i]<='9')
+				i++;
+			--i;
+		}
+		if (query[i]>='a'&&query[i]<='z')
+			words.back()+=query[i];
+	}
+	vector<string > file_name=root->get_files_from_word(price);
+	vector<string> res;
+	vector<fn> q;
+	for (int i=0;i<(int)file_name.size();++i){
+		int val=0;
+		ifstream fin("data/Search Engine-Data/"+file_name[i]);
+		string s;
+		while(fin>>s){
+			change(s,0);
+			for (auto it: words)
+				if (it==s) {
+					++val;
+					break;
+				}
+		}
+		fin.close();
+		q.push_back({file_name[i],val});
+	}
+	for (int i=0;i<(int)q.size();++i)
+		for (int j=i+1;j<(int)q.size();++j)
+			if (q[i].num<q[j].num) swap(q[i],q[j]);
+	for (int i=0;i<min(4,(int)q.size());++i)
+		res.push_back(q[i].file);
+	//res is answer
+	for (int i=0;i<(int)res.size();++i)
+		cout<<res[i]<<"\n";
 }
 void System::process_hashtag() {
 

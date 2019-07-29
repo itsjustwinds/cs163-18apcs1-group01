@@ -11,6 +11,7 @@
 #include <sys/types.h>
 //#include <dirent.h>
 #include <fstream>
+#include<algorithm>
 #include<memory>
 #include<string>
 #include <cerrno>
@@ -34,6 +35,8 @@ public:
 	trie* get_root();//done
 	//void get_files_name();//done
 	void InputFiles();
+	void Find_keyword(ifstream &fin, string key);
+	void Print(string filename, string key);
 	string getSearch();
 	void inputSearch();
 	vector<string> CutWord(string s, string type);//done
@@ -58,6 +61,10 @@ public:
 
 };
 
+struct fn{
+	string file;
+	int num;
+};
 
 
 #endif /* System_H_ */
