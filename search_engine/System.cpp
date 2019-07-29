@@ -42,14 +42,18 @@ trie* System::get_root() {
 	return root;
 }
 
-void change(string &S){
+void change(string &S,int is_query){
 	string tmp=S;
 	S="";
 	for (int i=0;i<(int)tmp.size();++i){
 		int ok=0;
 		if (tmp[i]>='a'&&tmp[i]<='z') ok=1;
 		if (tmp[i]>='A'&&tmp[i]<='Z') ok=1;
-		if (tmp[i]=='#'||tmp[i]=='$'||tmp[i]==' ') ok=1;
+		if (tmp[i]=='#'||tmp[i]=='$'||tmp[i]=='-') ok=1;
+		if (is_query){
+			if (tmp[i]=='+'||tmp[i]=='-') ok=1;
+			if (tmp[i]=='.'||tmp[i]==' ') ok=1;
+		}
 		if (!ok) continue;
 		if (tmp[i]>='A'&&tmp[i]<='Z') tmp[i]=char(tmp[i]-'A'+'a');
 		S=S+tmp[i];
@@ -69,7 +73,7 @@ void System::inputSearch() {
 	//system("cls");
 	cout << "Input your search:";
 	getline(cin, searchString, '\n');
-	change(searchString);
+	change(searchString,1);
 }
 
 string System::getSearch() {
@@ -83,7 +87,7 @@ void System::InputFiles() {
 		while (!fin.eof()) {
 			string fileName;
 			getline(fin, fileName, '\n');
-			files.push_back(fileName);
+			if (fileName.size()>4) files.push_back(fileName);
 		}
 	}
 	fin.close();
@@ -102,11 +106,12 @@ void System::build_trie() {
 		ifstream in(name);
 		if (!in.is_open()){
 			cout<<"error when open file";
+			system("pause");
 			return;
 		}
 		string S;
 		while(in>>S){
-			change(S);
+			change(S,0);
 			if (mark[S]||stopwords[S]) continue;
 			mark[S]=1;
 			root->add_word(S,file_name);
@@ -156,7 +161,7 @@ vector<string> System::CutWord(string s, string type) {
 			if (pos != -1) s.erase(pos + 1, type.size() - 1);
 		} while (pos != -1);
 	}
-	else if (type == "intitle:" || type == "filetype:") s.erase(0, type.size());
+	else if (type == "intitle:" || type == "filetype:") s.erase(0, type.size() - 1);
 	//Cut all words
 	int start = 0;
 	//int co = -1;
@@ -268,7 +273,6 @@ vector<string> getTitle(vector<string> wordfiles) {
 		fin.open("data/Search Engine-Data/"+wordfiles[i]);
 		string title;
 		getline(fin,title);
-		cout<<title<<"\n";
 		//fin >> title;
 		titles.push_back(title);
 		fin.close();
