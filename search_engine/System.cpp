@@ -6,42 +6,71 @@
  */
 
 #include"System.h"
-/*
-vector<string> GetDirectoryFiles(const string& dir) {
-  vector<string> files;
-  shared_ptr<DIR> directory_ptr(opendir(dir.c_str()), [](DIR* dir){ dir && closedir(dir); });
-  struct dirent *dirent_ptr;
-  if (!directory_ptr) {
-	  return files;
-  }
+ /*
+ vector<string> GetDirectoryFiles(const string& dir) {
+   vector<string> files;
+   shared_ptr<DIR> directory_ptr(opendir(dir.c_str()), [](DIR* dir){ dir && closedir(dir); });
+   struct dirent *dirent_ptr;
+   if (!directory_ptr) {
+	   return files;
+   }
 
-  while ((dirent_ptr = readdir(directory_ptr.get())) != nullptr) {
-    files.push_back(string(dirent_ptr->d_name));
-  }
-  return files;
-}
+   while ((dirent_ptr = readdir(directory_ptr.get())) != nullptr) {
+	 files.push_back(string(dirent_ptr->d_name));
+   }
+   return files;
+ }
 
 
 
-void System::get_files_name(){
-	  const auto& directory_path = string("data/Search Engine-Data");
-	  const auto& f = GetDirectoryFiles(directory_path);
-	  for (const auto& file : f)
-	  if((int)file.size()>2){
-	    files.push_back(file);
-	  }
-	  ofstream out("data/files.txt");
-	  for (int i=0;i<(int)files.size();++i){
-		  out<<files[i]<<"\n";
-		  //cout<<files[i]<<"\n";
-		  }
-	  out.close();
-}
-*/
+ void System::get_files_name(){
+	   const auto& directory_path = string("data/Search Engine-Data");
+	   const auto& f = GetDirectoryFiles(directory_path);
+	   for (const auto& file : f)
+	   if((int)file.size()>2){
+		 files.push_back(file);
+	   }
+	   ofstream out("data/files.txt");
+	   for (int i=0;i<(int)files.size();++i){
+		   out<<files[i]<<"\n";
+		   //cout<<files[i]<<"\n";
+		   }
+	   out.close();
+ }
+ */
 trie* System::get_root() {
 	return root;
 }
 
+void System::Find_keyword(ifstream &fin, string key) {
+	string read; cout << "...";
+	while (!fin.eof()) {
+		getline(fin, read);
+		string str = read;
+		for (int i = 0; i < (int) read.size(); i++)
+			if (read[i] >= 'A' && read[i] <= 'Z') read[i] = char(read[i] - 'A' + 'a');
+		int pos = read.find(key); 
+		if (pos != -1) {
+			if (pos < 100) pos = 0; else pos = pos - 100;
+			for (int w = pos; (w < pos + 200) && (w < (int)str.size()); w++) 
+				cout << str[w];
+			break;
+		}
+	}
+	cout << "..." << endl;
+}
+
+void System::Print(string filename, string key) {
+	ifstream fin;
+	fin.open("data/Search Engine-Data/" + filename);
+	string Title;
+	getline(fin, Title);
+	cout << Title << endl;
+	Find_keyword(fin, key);
+	fin.close();
+}
+
+<<<<<<< HEAD
 void System::Find_keyword(ifstream &fin, string key) {
 	string read; cout << "...";
 	while (!fin.eof()) {
@@ -91,18 +120,32 @@ void change(string &S,int is_query){
 		if (is_query){
 			if (tmp[i]=='+'||tmp[i]=='-') ok=1;
 			if (tmp[i]=='.'||tmp[i]==' ') ok=1;
+=======
+void change(string &S, int is_query) {
+	string tmp = S;
+	S = "";
+	for (int i = 0; i < (int)tmp.size(); ++i) {
+		int ok = 0;
+		if (tmp[i] >= 'a'&&tmp[i] <= 'z') ok = 1;
+		if (tmp[i] >= 'A'&&tmp[i] <= 'Z') ok = 1;
+		if (tmp[i] == '#' || tmp[i] == '$' || tmp[i] == '-') ok = 1;
+		if (tmp[i] >= '0'&&tmp[i] <= '9') ok = 1;
+		if (is_query) {
+			if (tmp[i] == '+' || tmp[i] == '-') ok = 1;
+			if (tmp[i] == '.' || tmp[i] == ' ') ok = 1;
+>>>>>>> adb2d89a09c94b880173d670ebc5779fed88298e
 		}
 		if (!ok) continue;
-		if (tmp[i]>='A'&&tmp[i]<='Z') tmp[i]=char(tmp[i]-'A'+'a');
-		S=S+tmp[i];
+		if (tmp[i] >= 'A'&&tmp[i] <= 'Z') tmp[i] = char(tmp[i] - 'A' + 'a');
+		S = S + tmp[i];
 	}
 }
 
 void System::load_stop_word() {
 	ifstream in("data/stop_words.txt");
 	string S;
-	while(getline(in,S)){
-		stopwords[S]=1;
+	while (getline(in, S)) {
+		stopwords[S] = 1;
 	}
 	in.close();
 }
@@ -111,7 +154,7 @@ void System::inputSearch() {
 	//system("cls");
 	cout << "Input your search:";
 	getline(cin, searchString, '\n');
-	change(searchString,1);
+	change(searchString, 1);
 }
 
 string System::getSearch() {
@@ -125,7 +168,7 @@ void System::InputFiles() {
 		while (!fin.eof()) {
 			string fileName;
 			getline(fin, fileName, '\n');
-			if (fileName.size()>4) files.push_back(fileName);
+			if (fileName.size() > 4) files.push_back(fileName);
 		}
 	}
 	fin.close();
@@ -134,30 +177,30 @@ void System::build_trie() {
 	//for every file
 	//vector<word>
 	//root.add_word(word,file)
-	
-	for (auto file_name: files){
+
+	for (auto file_name : files) {
 		vector<string > words;
 		words.clear();
-		map<string,int > mark;
+		map<string, int > mark;
 		mark.clear();
-		string name="data/Search Engine-Data/"+file_name;
+		string name = "data/Search Engine-Data/" + file_name;
 		ifstream in(name);
-		if (!in.is_open()){
-			cout<<"error when open file";
+		if (!in.is_open()) {
+			cout << "error when open file";
 			system("pause");
 			return;
 		}
 		string S;
-		while(in>>S){
-			change(S,0);
-			if (mark[S]||stopwords[S]) continue;
-			mark[S]=1;
-			root->add_word(S,file_name);
+		while (in >> S) {
+			change(S, 0);
+			if (mark[S] || stopwords[S]) continue;
+			mark[S] = 1;
+			root->add_word(S, file_name);
 		}
-		cout<<file_name<<" done \n";
+		cout << file_name << " done \n";
 		in.close();
 	}
-	cout<<"done loading\n";
+	cout << "done loading\n";
 }
 
 void System::Rank_files(int *check, vector<string> word) {
@@ -221,17 +264,15 @@ void System::process_AND(string s) {
 
 	Rank_files(check, word);
 
-	/*
 	int co = 0;
 	for (int i = 0; i < 15000; i++)
 	{
 		if (check[i] == word.size()) {
 			co++;
-			print(root->files[i]);
+			Print(files[i], word[0]);
 			}
 		if (co == 5) break;
 	}
-		*/
 }
 
 void System::process_OR(string s) {
@@ -253,8 +294,7 @@ void System::process_OR(string s) {
 			}
 		check[index_max] = -1;
 		print(files[index_max]);
-	}
-		*/
+	} */
 }
 
 void System::process_minus(string s) {
@@ -308,9 +348,9 @@ vector<string> getTitle(vector<string> wordfiles) {
 	for (int i = 0; i < (int)wordfiles.size(); i++)
 	{
 		ifstream fin;
-		fin.open("data/Search Engine-Data/"+wordfiles[i]);
+		fin.open("data/Search Engine-Data/" + wordfiles[i]);
 		string title;
-		getline(fin,title);
+		getline(fin, title);
 		//fin >> title;
 		titles.push_back(title);
 		fin.close();
@@ -320,10 +360,10 @@ vector<string> getTitle(vector<string> wordfiles) {
 
 void System::process_intitle(string s) {
 
-	int check[15000]; 
+	int check[15000];
 	for (int i = 0; i < 1000; i++) check[i] = 0;
 	//get vector<word> from query
-	
+
 	vector<string> word = CutWord(s, "intitle:");
 
 	//get all files thats have all word like AND query
