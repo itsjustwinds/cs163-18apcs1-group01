@@ -156,7 +156,7 @@ vector<string> System::CutWord(string s, string type) {
 			if (pos != -1) s.erase(pos + 1, type.size() - 1);
 		} while (pos != -1);
 	}
-	else if (type == "intitle:" || type == "filetype:") s.erase(0, type.size());
+	else if (type == "intitle:" || type == "filetype:") s.erase(0, type.size() - 1);
 	//Cut all words
 	int start = 0;
 	//int co = -1;
