@@ -13,7 +13,7 @@ int main(){
 	SYSTEM.build_trie();
 	SYSTEM.inputSearch();
 	SYSTEM.process_intitle(SYSTEM.getSearch());
-	system("pause");
+	//system("pause");
 	return 0;
 }
 

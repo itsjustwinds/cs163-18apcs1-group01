@@ -49,8 +49,9 @@ void change(string &S){
 		int ok=0;
 		if (tmp[i]>='a'&&tmp[i]<='z') ok=1;
 		if (tmp[i]>='A'&&tmp[i]<='Z') ok=1;
-		if (tmp[i]=='#'||tmp[i]=='$') ok=1;
+		if (tmp[i]=='#'||tmp[i]=='$'||tmp[i]==' ') ok=1;
 		if (!ok) continue;
+		if (tmp[i]>='A'&&tmp[i]<='Z') tmp[i]=char(tmp[i]-'A'+'a');
 		S=S+tmp[i];
 	}
 }
@@ -65,9 +66,10 @@ void System::load_stop_word() {
 }
 
 void System::inputSearch() {
-	system("cls");
+	//system("cls");
 	cout << "Input your search:";
 	getline(cin, searchString, '\n');
+	change(searchString);
 }
 
 string System::getSearch() {
@@ -108,11 +110,11 @@ void System::build_trie() {
 			if (mark[S]||stopwords[S]) continue;
 			mark[S]=1;
 			root->add_word(S,file_name);
-			cout<<S<<" "<<file_name<<"\n";
 		}
+		cout<<file_name<<" done \n";
 		in.close();
 	}
-	cout<<"done loading";
+	cout<<"done loading\n";
 }
 
 void System::Rank_files(int *check, vector<string> word) {
@@ -263,10 +265,13 @@ vector<string> getTitle(vector<string> wordfiles) {
 	for (int i = 0; i < (int)wordfiles.size(); i++)
 	{
 		ifstream fin;
-		fin.open(wordfiles[i] + ".txt");
+		fin.open("data/Search Engine-Data/"+wordfiles[i]);
 		string title;
-		fin >> title;
+		getline(fin,title);
+		cout<<title<<"\n";
+		//fin >> title;
 		titles.push_back(title);
+		fin.close();
 	}
 	return titles;
 }
