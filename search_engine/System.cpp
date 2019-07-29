@@ -6,7 +6,7 @@
  */
 
 #include"System.h"
-
+/*
 vector<string> GetDirectoryFiles(const string& dir) {
   vector<string> files;
   shared_ptr<DIR> directory_ptr(opendir(dir.c_str()), [](DIR* dir){ dir && closedir(dir); });
@@ -37,7 +37,7 @@ void System::get_files_name(){
 		  }
 	  out.close();
 }
-
+*/
 trie* System::get_root() {
 	return root;
 }
@@ -64,10 +64,33 @@ void System::load_stop_word() {
 	in.close();
 }
 
+void System::inputSearch() {
+	system("cls");
+	cout << "Input your search:";
+	getline(cin, searchString, '\n');
+}
+
+string System::getSearch() {
+	return searchString;
+}
+
+void System::InputFiles() {
+	ifstream fin;
+	fin.open("data/files.txt");
+	if (fin.is_open()) {
+		while (!fin.eof()) {
+			string fileName;
+			getline(fin, fileName, '\n');
+			files.push_back(fileName);
+		}
+	}
+	fin.close();
+}
 void System::build_trie() {
 	//for every file
 	//vector<word>
 	//root.add_word(word,file)
+	
 	for (auto file_name: files){
 		vector<string > words;
 		words.clear();
@@ -249,8 +272,11 @@ vector<string> getTitle(vector<string> wordfiles) {
 }
 
 void System::process_intitle(string s) {
-	int check[15000]; for (int i = 0; i < 15000; i++) check[i] = 0;
+
+	int check[15000]; 
+	for (int i = 0; i < 1000; i++) check[i] = 0;
 	//get vector<word> from query
+	
 	vector<string> word = CutWord(s, "intitle:");
 
 	//get all files thats have all word like AND query

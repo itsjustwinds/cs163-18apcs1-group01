@@ -9,7 +9,7 @@
 #define System_H_
 #include<iostream>
 #include <sys/types.h>
-#include <dirent.h>
+//#include <dirent.h>
 #include <fstream>
 #include<memory>
 #include<string>
@@ -21,6 +21,7 @@
 using namespace std;
 class System {
 private:
+	string searchString;
 	trie* root;
 	map<string, int> stopwords;
 	vector<string > files;
@@ -31,7 +32,10 @@ public:
 		stopwords.clear();
 	}
 	trie* get_root();//done
-	void get_files_name();//done
+	//void get_files_name();//done
+	void InputFiles();
+	string getSearch();
+	void inputSearch();
 	vector<string> CutWord(string s, string type);//done
 	void Rank_files(int *check, vector<string> word);//done
 	void Rank_up(int *check, vector<string> wordfiles);//done
