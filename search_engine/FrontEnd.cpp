@@ -226,3 +226,70 @@ bool InputChar(string &res, int x, int y, bool password, int bound, bool edit) /
 	}
 	return true;
 }
+int Select(int r, int c, int &Pos)
+{
+	char ch, temp;
+	int row = Pos / c, col = Pos % c;
+	ch = _getch();
+	temp = _getch();
+	if ((ch == 27) && (temp == 0)) return 2;
+	if ((ch == -32) && (temp == 72) && (row > 0))
+	{
+		Pos -= c;
+		//up button
+	}
+	if ((ch == -32) && (temp == 80) && (row < r - 1))
+	{
+		Pos += c;
+		//down button
+	}
+	if ((ch == -32) && (temp == 75) && (col > 0))
+	{
+		Pos--;
+		//left button
+	}
+	if ((ch == -32) && (temp == 77) && (col < c - 1))
+	{
+		Pos++;
+		//right button
+	}
+	if ((ch == 13) && (temp == 0))
+		return 1;
+	return 0;
+}
+int Choose_Scene(vector <string> list, int maxSelect, int x, int y, int h, bool NumAtBegin, int xx, int yy) //list, max_selections, coordinates, height, Use x. before selections or not
+{
+	int sz = list.size(), Pos = 0, select;
+	int begin = 0, end = min(sz, maxSelect);
+	do
+	{
+		if (Pos < begin)
+		{
+			begin--;
+			end--;
+		}
+		if (Pos >= end)
+		{
+			begin++;
+			end++;
+		}
+		string s;
+		for (int i = begin; i < end; i++)
+		{
+			s = "";
+			if (NumAtBegin)
+			{
+				s += to_string(i + 1);
+				s += ". ";
+			}
+			s += list[i];
+			ClearFrame(x, y + (i - begin) * h, xx, yy);
+			OutputString(s, x, y + (i - begin) * h, (Pos == i));
+		}
+		select = Select(sz, 1, Pos);
+	} while (!select);
+	if (select == 2) return -1;
+	else return Pos;
+
+
+}
