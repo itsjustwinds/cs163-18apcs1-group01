@@ -47,12 +47,12 @@ int System::check_file(string s) {
 	return -1;
 }
 
-string System::Find_keyword(ifstream &fin, vector<string> word) {
-	//bool check = true;
+void System::Find_keyword(ifstream &fin, vector<string> word) {
+	bool check = true;
 	for (int i = 0; i < (int)word.size(); i++)
 	{
 		string key = " " + word[i] + " ";
-		string read; //cout << "...";
+		string read; cout << "...";
 		while (!fin.eof()) {
 			getline(fin, read);
 			read = " " + read + " ";
@@ -64,34 +64,31 @@ string System::Find_keyword(ifstream &fin, vector<string> word) {
 			}
 			int pos = read.find(key);
 			if (pos != -1) {
-				/* if ((int)read.size() < 250) cout << str; else {
+				if ((int)read.size() < 250) cout << str; else {
 					if (pos < 100) pos = 0; else pos = pos - 100;
 					for (int w = pos; (w < pos + 200) && (w < (int)str.size()); w++)
-						cout << str[w]; */
-				return read;
-				//}
-				//check = false;
-				//break;
+						cout << str[w];
+				}
+				check = false;
+				break;
 			}
-			//if (!check) break;
+			if (!check) break;
 		}
-		//if (!check) break;
+		if (!check) break;
 	}
-	//cout << "..." << endl;
-	//cout << endl;
+	cout << "..." << endl;
+	cout << endl;
 }
 
-string System::Print(string filename, vector<string> word) {
+void System::Print(string filename, vector<string> word) {
 	ifstream fin;
 	fin.open("data/Search Engine-Data/" + filename);
 	string Title;
 	getline(fin, Title);
 	cout << Title << endl;
-	string keystr = Find_keyword(fin, word);
+	Find_keyword(fin, word);
 	fin.close();
-	return keystr;
 }
-
 void change(string &S, int is_query) {
 	if (!is_query) {
 		for (int i = 0; i < (int)S.size(); ++i)
@@ -239,29 +236,22 @@ vector<string> System::CutWord(string s, string type) {
 }
 
 void System::process_AND(string s) {
-	int *check = new int[12000]; 
+	int *check = new int[12000];
 	for (int i = 0; i < 12000; i++) check[i] = 0;
 
 	vector<string> word = CutWord(s, " and ");
 
 	Rank_files(check, word);
-	
-	vector<string> ans;
+
 	int co = 0;
 	for (int i = 0; i < 12000; i++)
 	{
 		if (check[i] >= (int)word.size()) {
 			co++;
-			ans.push_back(files[i]);
+			cout << files[i] << endl;
+			Print(files[i], word);
 		}
 		if (co == 5) break;
-	}
-
-	vector<string> little_ans;
-	for (int i = 0; i < (int)ans.size(); i++)
-	{
-		string tmp = Print(ans[i], word);
-		little_ans.push_back(tmp);
 	}
 }
 
@@ -273,7 +263,7 @@ void System::process_OR(string s) {
 
 	Rank_files(check, word);
 
-	vector<string> ans;
+
 	for (int co = 0; co < 5; co++)
 	{
 		int max = 0, index_max = -1;
@@ -285,15 +275,8 @@ void System::process_OR(string s) {
 			}
 		if (index_max != -1) {
 			check[index_max] = -1;
-			ans.push_back(files[index_max]);
+			Print(files[index_max], word);
 		}
-	}
-
-	vector<string> little_ans;
-	for (int i = 0; i < (int)ans.size(); i++)
-	{
-		string tmp = Print(ans[i], word);
-		little_ans.push_back(tmp);
 	}
 }
 
@@ -321,8 +304,6 @@ void System::process_minus(string s) {
 			Rank_up(check, wordfiles);
 		}
 	}
-	
-	vector<string> ans;
 	for (int co = 0; co < 5; co++)
 	{
 		int max = 0, index_max = -1;
@@ -334,18 +315,10 @@ void System::process_minus(string s) {
 			}
 		if (index_max != -1) {
 			check[index_max] = -1;
-			ans.push_back(files[index_max]);
+			Print(files[index_max], word);
 		}
 	}
-
-	vector<string> little_ans;
-	for (int i = 0; i < (int)ans.size(); i++)
-	{
-		string tmp = Print(ans[i], word);
-		little_ans.push_back(tmp);
-	}
 }
-
 void checkTitle(string word, vector<string> titles, int* check) {
 	for (int i = 0; i < (int)titles.size(); i++)
 	{
@@ -383,6 +356,10 @@ void System::process_intitle(string s) {
 	vector<string> wordfiles;
 	vector<string> wordTitle;
 
+	vector<string> fileNamePush;
+	vector<string> titlePush;
+	vector<string> wordPush;
+
 	for (int i = 0; i < (int)word.size(); i++)
 	{
 		wordfiles = root->get_files_from_word(word[i]);
@@ -394,29 +371,30 @@ void System::process_intitle(string s) {
 	for (int co = 0; co < 5; co++)
 	{
 		int max = 0, index_max = 0;
-		for (int i = 0; i < wordfiles.size(); i++) 
-		if (check[i] > max)
-		{
-			max = check[i];
-			index_max = i;
-		}
+		for (int i = 0; i < wordfiles.size(); i++)
+			if (check[i] > max)
+			{
+				max = check[i];
+				index_max = i;
+			}
 		check[index_max] = -1;
 		if (max > 0) {
 			//print name file
-			cout << wordfiles[index_max] << endl;
 			ifstream fin;
 			fin.open("data/Search Engine-Data/" + wordfiles[index_max]);
+			fileNamePush.push_back(wordfiles[index_max]);
 			string text;
-			getline(fin, text);	
+			getline(fin, text);
 			//print title
-			cout << text << endl;
+			titlePush.push_back(text);
+
 			//print some text of title's file
 			int maxSize = 60;
 			getline(fin, text);
 			if (text.length() > maxSize)
 				text.erase(maxSize, text.length() - maxSize);
-			cout << text + "..." << endl;
-			cout << endl;
+			text = text + "...";
+			wordPush.push_back(text);
 			fin.close();
 		}
 	}
@@ -429,52 +407,52 @@ void System::process_plus(string s) {
 	vector<string> word = CutWord(s, " +");
 
 	Rank_files(check, word);
-	
-	vector<string> ans;
+
 	int co = 0;
 	for (int i = 0; i < 12000; i++)
 	{
 		if (check[i] >= (int)word.size()) {
 			co++;
-			ans.push_back(files[i]);
+			Print(files[i], word);
 		}
 		if (co == 5) break;
-	}
-
-	vector<string> little_ans;
-	for (int i = 0; i < (int)ans.size(); i++)
-	{
-		string tmp = Print(ans[i], word);
-		little_ans.push_back(tmp);
 	}
 }
 
 void System::process_type(string s) {
+	vector<string> fileNamePush;
+	vector<string> titlePush;
+	vector<string> wordPush;
+
 	//from list of file, return file that same type as query
 	vector<string> word = CutWord(s, "filetype:");
 
 	if (word[0] == "txt")
-		for (int i = 1; i < 6; i++)
+		for (int i = 1; i < 6; i++)	//5 first files
 		{
 			//print name file
-			cout << files[i] << endl;
+			fileNamePush.push_back(files[i]);
 			ifstream fin;
 			fin.open("data/Search Engine-Data/" + files[i]);
 			string text;
+
 			getline(fin, text);
+			titlePush.push_back(text);
 			//print title
 			cout << text << endl;
+
 			//print some text of title's file
 			int maxSize = 60;
 			getline(fin, text);
 			if (text.length() > maxSize)
 				text.erase(maxSize, text.length() - maxSize);
-			cout << text + "..." << endl;
-			cout << endl;
+			text = text + "...";
+			wordPush.push_back(text);
 			fin.close();
 		}
 	else {
-		cout << "There's no " + word[0] + " file!";
+		string text = "There's no " + word[0] + " file!";
+		wordPush.push_back(text);
 	}
 }
 
@@ -546,5 +524,9 @@ void System::process_synonyms() {
 
 }
 void System::history() {
+
+}
+
+void System::pushtoFrontEnd(vector<string> fileName, vector<string> titleName, vector<string> shortWord) {
 
 }

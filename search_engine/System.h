@@ -9,7 +9,7 @@
 #define System_H_
 #include<iostream>
 #include <sys/types.h>
-//#include <dirent.h>
+ //#include <dirent.h>
 #include <fstream>
 #include<algorithm>
 #include<memory>
@@ -20,7 +20,7 @@
 #include<fstream>
 #include"trie.h"
 using namespace std;
-void change(string &S,int is_query);
+void change(string &S, int is_query);
 class System {
 private:
 	string searchString;
@@ -36,11 +36,12 @@ public:
 	//void get_files_name();//done
 	void InputFiles();
 	int check_file(string s);
-	string Find_keyword(ifstream &fin, vector<string> word);
-	string Print(string filename, vector<string> word);
+	void Find_keyword(ifstream &fin, vector<string> word);
+	void Print(string filename, vector<string> word);
 
 	string getSearch();
 	void inputSearch();
+	void pushtoFrontEnd(vector<string> fileName, vector<string> titleName, vector<string> shortWord);
 	vector<string> CutWord(string s, string type);//done
 	void Rank_files(int *check, vector<string> word);//done
 	void Rank_up(int *check, vector<string> wordfiles);//done
@@ -63,7 +64,7 @@ public:
 
 };
 
-struct fn{
+struct fn {
 	string file;
 	int num;
 };
