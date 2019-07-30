@@ -35,8 +35,8 @@ public:
 	trie* get_root();//done
 	//void get_files_name();//done
 	void InputFiles();
-	void Find_keyword(ifstream &fin, string key);
-	void Print(string filename, string key);
+	void Find_keyword(ifstream &fin, vector<string> word);
+	void Print(string filename, vector<string> word);
 	string getSearch();
 	void inputSearch();
 	vector<string> CutWord(string s, string type);//done
