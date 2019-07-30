@@ -144,19 +144,22 @@ void System::build_trie() {
 	//for every file
 	//vector<word>
 	//root.add_word(word,file)
-
+	int cnt = 0;
 	for (auto file_name : files) {
+		++cnt;
+		if (cnt > 100)
+			break;
 		vector<string > words;
 		words.clear();
 		map<string, int > mark;
 		mark.clear();
 		string name = "data/Search Engine-Data/" + file_name;
 		ifstream in(name);
-		if (!in.is_open()) {
-			cout << "error when open file";
+		/*if (!in.is_open()) {
+			cout << "error when open file "<<file_name;
 			system("pause");
 			return;
-		}
+		}*/
 		string S;
 		while (in >> S) {
 			change(S, 0);
@@ -164,7 +167,7 @@ void System::build_trie() {
 			mark[S] = 1;
 			root->add_word(S, file_name);
 		}
-		cout << file_name << " done \n";
+		cout << cnt << "/" << files.size() << " " << file_name << " done \n";
 		in.close();
 	}
 	cout << "done loading\n";
@@ -304,7 +307,7 @@ void System::process_minus(string s) {
 void checkTitle(string word, vector<string> titles, int* check) {
 	for (int i = 0; i < (int)titles.size(); i++)
 	{
-		if (titles[i].find(word) == string::npos)
+		if (titles[i].find(word) != string::npos)
 			check[i]++;
 	}
 }
@@ -325,7 +328,7 @@ vector<string> getTitle(vector<string> wordfiles) {
 }
 
 void System::process_intitle(string s) {
-
+	cout << endl;
 	int check[15000];
 	for (int i = 0; i < 1000; i++) check[i] = 0;
 	//get vector<word> from query
@@ -346,6 +349,36 @@ void System::process_intitle(string s) {
 	}
 
 	//print 5 max value
+	for (int co = 0; co < 5; co++)
+	{
+		int max = 0, index_max = 0;
+		for (int i = 0; i < wordfiles.size(); i++) 
+		if (check[i] > max)
+		{
+			max = check[i];
+			index_max = i;
+		}
+		check[index_max] = -1;
+		if (max > 0) {
+			//print name file
+			cout << wordfiles[index_max] << endl;
+			ifstream fin;
+			fin.open("data/Search Engine-Data/" + wordfiles[index_max]);
+			string text;
+			getline(fin, text);	
+			//print title
+			cout << text << endl;
+			//print some text of title's file
+			int maxSize = 60;
+			getline(fin, text);
+			if (text.length() > maxSize)
+				text.erase(maxSize, text.length() - maxSize);
+			cout << text + "..." << endl;
+			cout << endl;
+			fin.close();
+		}
+	}
+
 }
 
 void System::process_plus(string s) {
@@ -369,10 +402,28 @@ void System::process_type(string s) {
 	//from list of file, return file that same type as query
 	vector<string> word = CutWord(s, "filetype:");
 
-	vector<string> wordfiles;
-	for (int i = 0; i < (int)word.size(); i++)
-	{
-		wordfiles = root->get_files_from_word(word[i]);
+	if (word[0] == "txt")
+		for (int i = 1; i < 6; i++)
+		{
+			//print name file
+			cout << files[i] << endl;
+			ifstream fin;
+			fin.open("data/Search Engine-Data/" + files[i]);
+			string text;
+			getline(fin, text);
+			//print title
+			cout << text << endl;
+			//print some text of title's file
+			int maxSize = 60;
+			getline(fin, text);
+			if (text.length() > maxSize)
+				text.erase(maxSize, text.length() - maxSize);
+			cout << text + "..." << endl;
+			cout << endl;
+			fin.close();
+		}
+	else {
+		cout << "There's no " + word[0] + " file!";
 	}
 }
 

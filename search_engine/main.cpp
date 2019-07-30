@@ -12,8 +12,10 @@ int main(){
 	SYSTEM.load_stop_word();
 	SYSTEM.build_trie();
 	SYSTEM.inputSearch();
-	SYSTEM.process_a_price();
-	//system("pause");
+	SYSTEM.process_type(SYSTEM.getSearch());
+	//SYSTEM.process_intitle(SYSTEM.getSearch());
+	//SYSTEM.process_a_price();
+	system("pause");
 	return 0;
 }
 
