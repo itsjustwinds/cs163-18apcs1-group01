@@ -42,31 +42,42 @@ trie* System::get_root() {
 	return root;
 }
 
-void System::Find_keyword(ifstream &fin, string key) {
-	string read; cout << "...";
-	while (!fin.eof()) {
-		getline(fin, read);
-		string str = read;
-		for (int i = 0; i < (int) read.size(); i++)
-			if (read[i] >= 'A' && read[i] <= 'Z') read[i] = char(read[i] - 'A' + 'a');
-		int pos = read.find(key);
-		if (pos != -1) {
-			if (pos < 100) pos = 0; else pos = pos - 100;
-			for (int w = pos; (w < pos + 200) && (w < (int)str.size()); w++)
-				cout << str[w];
-			break;
+void System::Find_keyword(ifstream &fin, vector<string> word) {
+	bool check = true;
+	for (int i = 0; i < (int)word.size(); i++)
+	{
+		string key = " " + word[i] + " ";
+		string read; cout << "...";
+		while (!fin.eof()) {
+			getline(fin, read);
+			read = " " + read + " ";
+			string str = read;
+			for (int i = 0; i < (int)read.size(); i++)
+				if (read[i] >= 'A' && read[i] <= 'Z') read[i] = char(read[i] - 'A' + 'a');
+			int pos = read.find(key);
+			if (pos != -1) {
+				if ((int)read.size() < 250) cout << str; else {
+					if (pos < 100) pos = 0; else pos = pos - 100;
+					for (int w = pos; (w < pos + 200) && (w < (int)str.size()); w++)
+						cout << str[w];
+				}
+				check = false;
+				break;
+			}
+			if (!check) break;
 		}
+		if (!check) break;
 	}
 	cout << "..." << endl;
 }
 
-void System::Print(string filename, string key) {
+void System::Print(string filename, vector<string> word) {
 	ifstream fin;
 	fin.open("data/Search Engine-Data/" + filename);
 	string Title;
 	getline(fin, Title);
 	cout << Title << endl;
-	Find_keyword(fin, key);
+	Find_keyword(fin, word);
 	fin.close();
 }
 
@@ -221,17 +232,15 @@ void System::process_AND(string s) {
 
 	Rank_files(check, word);
 
-	/*
 	int co = 0;
 	for (int i = 0; i < 15000; i++)
 	{
 		if (check[i] == word.size()) {
 			co++;
-			print(root->files[i]);
+			Print(files[i], word);
 			}
 		if (co == 5) break;
 	}
-		*/
 }
 
 void System::process_OR(string s) {
@@ -241,7 +250,7 @@ void System::process_OR(string s) {
 
 	Rank_files(check, word);
 
-	/*
+
 	for (int co = 0; co < 5; co++)
 	{
 		int max = 0, index_max;
@@ -252,9 +261,8 @@ void System::process_OR(string s) {
 				index_max = i;
 			}
 		check[index_max] = -1;
-		print(files[index_max]);
+		Print(files[index_max], word);
 	}
-		*/
 }
 
 void System::process_minus(string s) {
@@ -262,7 +270,7 @@ void System::process_minus(string s) {
 	//get first and second word from query
 	vector<string> word = CutWord(s, " -");
 	//get all files thats have i word
-	vector<string> wordfiles;
+	vector<string> wordfiles; vector<string> keyword;
 	for (int i = 0; i < (int)word.size(); i++)
 	{
 		if (word[i][0] == '-')
@@ -274,12 +282,12 @@ void System::process_minus(string s) {
 		}
 		else
 		{
+			keyword.push_back(word[i]);
 			wordfiles = root->get_files_from_word(word[i]);
 			// Rank up + all these files
 			Rank_up(check, wordfiles);
 		}
 	}
-	/*
 	for (int co = 0; co < 5; co++)
 	{
 		int max = 0, index_max;
@@ -290,9 +298,8 @@ void System::process_minus(string s) {
 				index_max = i;
 			}
 		check[index_max] = -1;
-		print(files[index_max]);
+		Print(files[index_max], keyword);
 	}
-		*/
 }
 
 void checkTitle(string word, vector<string> titles, int* check) {
@@ -348,17 +355,15 @@ void System::process_plus(string s) {
 
 	Rank_files(check, word);
 
-	/*
 	int co = 0;
 	for (int i = 0; i < 15000; i++)
 	{
 		if (check[i] == word.size()) {
 			co++;
-			print(root->files[i]);
-			}
+			Print(files[i], word);
+		}
 		if (co == 5) break;
 	}
-		*/
 }
 
 void System::process_type(string s) {
