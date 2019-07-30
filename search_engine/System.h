@@ -35,6 +35,7 @@ public:
 	trie* get_root();//done
 	//void get_files_name();//done
 	void InputFiles();
+	int check_file(string s);
 	void Find_keyword(ifstream &fin, vector<string> word);
 	void Print(string filename, vector<string> word);
 
