@@ -27,10 +27,15 @@ private:
 	trie* root;
 	map<string, int> stopwords;
 	vector<string > files;
+	vector<vector<string> > synonym;
+	map<string,int > ID_synonym;
 public:
 	System() {
 		root = new trie();
+		files.clear();
 		stopwords.clear();
+		synonym.clear();
+		ID_synonym.clear();
 	}
 	trie* get_root();//done
 	//void get_files_name();//done
@@ -46,6 +51,7 @@ public:
 	void Rank_files(int *check, vector<string> word);//done
 	void Rank_up(int *check, vector<string> wordfiles);//done
 	void Rank_down(int *check, vector<string> wordfiles);//done
+	void load_synonym();
 	void load_stop_word();//done
 	void build_trie();
 	void process_AND(string s);//1

@@ -93,31 +93,35 @@ vector<string> System::Print(string filename, vector<string> word) {
 	return ans_tmp;
 }
 
-void change(string &S, int is_query) {
-	if (!is_query) {
-		for (int i = 0; i < (int)S.size(); ++i)
-			if (S[i] == '$') {
-				while (S[0] != '$') S.erase(S.begin());
-				while (S.size() && (S.back() >= '0'&&S.back() <= '9') == 0)
-					S.pop_back();
-				return;
-			}
+void change(string &S,int is_query){
+	if (!is_query){
+	for (int i=0;i<(int)S.size();++i)
+	if (S[i]=='$'){
+		while(S[0]!='$') S.erase(S.begin());
+		string tmp=S;
+		S="";
+		for (int j=0;j<(int)tmp.size();++j)
+		if(tmp[j]=='$'||(tmp[j]>='0'&&tmp[j]<='9'))
+			S=S+tmp[j];
+		return ;
 	}
-	string tmp = S;
-	S = "";
-	for (int i = 0; i < (int)tmp.size(); ++i) {
-		int ok = 0;
-		if (tmp[i] >= 'a'&&tmp[i] <= 'z') ok = 1;
-		if (tmp[i] >= 'A'&&tmp[i] <= 'Z') ok = 1;
-		if (tmp[i] >= '0'&&tmp[i] <= '9') ok = 1;
-		if (tmp[i] == '#' || tmp[i] == '$' || tmp[i] == '-') ok = 1;
-		if (is_query) {
-			if (tmp[i] == '+' || tmp[i] == '-') ok = 1;
-			if (tmp[i] == '.' || tmp[i] == ' ') ok = 1;
+	}
+	string tmp=S;
+	S="";
+	for (int i=0;i<(int)tmp.size();++i){
+		int ok=0;
+		if (tmp[i]>='a'&&tmp[i]<='z') ok=1;
+		if (tmp[i]>='A'&&tmp[i]<='Z') ok=1;
+		if (tmp[i]>='0'&&tmp[i]<='9') ok=1;
+		if (tmp[i]=='#'||tmp[i]=='$'||tmp[i]=='-') ok=1;
+		if (is_query){
+			if (tmp[i]=='+'||tmp[i]=='-') ok=1;
+			if (tmp[i]=='.'||tmp[i]==' ') ok=1;
+			if (tmp[i]=='*'||tmp[i]=='~') ok=1;
 		}
 		if (!ok) continue;
-		if (tmp[i] >= 'A'&&tmp[i] <= 'Z') tmp[i] = char(tmp[i] - 'A' + 'a');
-		S = S + tmp[i];
+		if (tmp[i]>='A'&&tmp[i]<='Z') tmp[i]=char(tmp[i]-'A'+'a');
+		S=S+tmp[i];
 	}
 }
 
@@ -157,33 +161,30 @@ void System::build_trie() {
 	//for every file
 	//vector<word>
 	//root.add_word(word,file)
-	int cnt = 0;
-	for (auto file_name : files) {
-		++cnt;
-		if (cnt > 100)
-			break;
+	
+	for (auto file_name: files){
 		vector<string > words;
 		words.clear();
-		map<string, int > mark;
+		map<string,int > mark;
 		mark.clear();
-		string name = "data/Search Engine-Data/" + file_name;
+		string name="data/Search Engine-Data/"+file_name;
 		ifstream in(name);
-		/*if (!in.is_open()) {
-			cout << "error when open file "<<file_name;
+		if (!in.is_open()){
+			cout<<"error when open file";
 			system("pause");
 			return;
-		}*/
-		string S;
-		while (in >> S) {
-			change(S, 0);
-			if (mark[S] || stopwords[S]) continue;
-			mark[S] = 1;
-			root->add_word(S, file_name);
 		}
-		cout << cnt << "/" << files.size() << " " << file_name << " done \n";
+		string S;
+		while(in>>S){
+			change(S,0);
+			if (mark[S]||stopwords[S]) continue;
+			mark[S]=1;
+			root->add_word(S,file_name);
+		}
+		cout<<file_name<<" done \n";
 		in.close();
 	}
-	cout << "done loading\n";
+	cout<<"done loading\n";
 }
 
 void System::Rank_files(int *check, vector<string> word) {
@@ -497,75 +498,417 @@ void System::process_type(string s) {
 }
 
 void System::process_a_price() {
-	string query = searchString;
-	string price = "";
+	string query=searchString;
+	string price="";
 	vector<string > words;
-	for (int i = 0; i < (int)query.size(); ++i) {
-		if (query[i] != '$') continue;
-		for (int j = i; j < (int)query.size(); ++j) {
-			if (query[j] == ' ') break;
-			price += query[j];
+	words.clear();
+	for (int i=0;i<(int)query.size();++i){
+		if (query[i]!='$') continue;
+		for (int j=i;j<(int)query.size();++j){
+			if (query[j]==' ') break;
+			price+=query[j];
 		}
 		break;
 	}
-	query = " " + query;
-	for (int i = 0; i < (int)query.size(); ++i) {
-		if (query[i] == ' ') words.push_back("");
-		if (query[i] == '$') {
+	query=" "+query;
+	for (int i=0;i<(int)query.size();++i){
+		if (query[i]==' ') words.push_back("");
+		if(query[i]=='$'){
 			words.pop_back();
 			++i;
-			while (i < (int)query.size() && query[i] >= '0'&&query[i] <= '9')
+			while(i<(int)query.size()&&query[i]>='0'&&query[i]<='9')
 				i++;
 			--i;
 		}
-		if (query[i] >= 'a'&&query[i] <= 'z')
-			words.back() += query[i];
+		if (query[i]>='a'&&query[i]<='z')
+			words.back()+=query[i];
 	}
-	vector<string > file_name = root->get_files_from_word(price);
+	vector<string > file_name=root->get_files_from_word(price);
 	vector<string> res;
+	res.clear();
 	vector<fn> q;
-	for (int i = 0; i < (int)file_name.size(); ++i) {
-		int val = 0;
-		ifstream fin("data/Search Engine-Data/" + file_name[i]);
+	q.clear();
+	for (int i=0;i<(int)file_name.size();++i){
+		int val=0;
+		ifstream fin("data/Search Engine-Data/"+file_name[i]);
 		string s;
-		while (fin >> s) {
-			change(s, 0);
-			for (auto it : words)
-				if (it == s) {
+		int cnt=0;
+		int* dd;
+		dd=new int[(int)words.size()];
+		for (int j=0;j<(int)words.size();++j)
+			dd[j]=0;
+		while(fin>>s){
+			change(s,0);
+			for (int j=0;j<(int)words.size();++j)
+				if (words[j]==s) {
 					++val;
+					if(dd[j]==0){
+						dd[j]=1;
+						cnt++;
+					}
 					break;
 				}
 		}
 		fin.close();
-		q.push_back({ file_name[i],val });
+		if(cnt==(int)words.size())
+			q.push_back({file_name[i],val});
+		delete[] dd;
+		dd=NULL;
 	}
-	for (int i = 0; i < (int)q.size(); ++i)
-		for (int j = i + 1; j < (int)q.size(); ++j)
-			if (q[i].num < q[j].num) swap(q[i], q[j]);
-	for (int i = 0; i < min(4, (int)q.size()); ++i)
+	for (int i=0;i<(int)q.size();++i)
+		for (int j=i+1;j<(int)q.size();++j)
+			if (q[i].num<q[j].num) swap(q[i],q[j]);
+	for (int i=0;i<min(5,(int)q.size());++i)
 		res.push_back(q[i].file);
 	//res is answer
-	for (int i = 0; i < (int)res.size(); ++i)
-		cout << res[i] << "\n";
+	for (int i=0;i<(int)res.size();++i)
+		cout<<res[i]<<"\n";
 }
 void System::process_hashtag() {
+	string S=searchString;
+	vector<string > file_name=root->get_files_from_word(S);
+	vector<string> res;
+	res.clear();
+	vector<fn> q;
+	q.clear();
+	for (int i=0;i<(int)file_name.size();++i){
+		int val=0;
+		ifstream fin("data/Search Engine-Data/"+file_name[i]);
+		string s;
+		while(fin>>s){
+			if (s==S) ++val;
+		}
+		fin.close();
+		q.push_back({file_name[i],val});
+	}
+	for (int i=0;i<(int)q.size();++i)
+		for (int j=i+1;j<(int)q.size();++j)
+			if (q[i].num<q[j].num) swap(q[i],q[j]);
+	for (int i=0;i<min(5,(int)q.size());++i)
+		res.push_back(q[i].file);
+	//res is answer
+	for (int i=0;i<(int)res.size();++i)
+		cout<<res[i]<<"\n";
 
 }
 void System::process_exact_match() {
+	string query=searchString;
+	vector<string> word;
+	word.clear();
+	query=" "+query;
+	for (auto it: query){
+		if (it==' ') word.push_back("");
+		else word.back()+=it;
+	}
+	vector<string > files_name;
+	files_name.clear();
+	int ok=1;
+	for (int i=0;i<(int)word.size();++i){
+		if (stopwords[word[i]]) continue;
+		if(ok){
+			files_name=root->get_files_from_word(word[i]);
+			ok=0;
+			continue;
+		}
+		vector<string > SS=root->get_files_from_word(word[i]);
+		vector<string > sum;
+		sum.clear();
+		for (int j=0;j<(int)SS.size();++j)
+			for (int k=0;k<(int)files_name.size();++k)
+				if (files_name[k]==SS[j]){
+					sum.push_back(files_name[k]);
+					break;
+				}
+		files_name=sum;
+	}
+	vector<fn > q;
+	q.clear();
+	for (int i=0;i<(int)files_name.size();++i){
 
+		ifstream fin("data/Search Engine-Data/"+files_name[i]);
+		vector<string> par;
+		par.clear();
+		string sS;
+		while(fin>>sS){
+			change(sS,0);
+			par.push_back(sS);
+		}
+		int val=0;
+		for (int i=0;i<(int)par.size();++i){
+			int cnt=0;
+			for (int j=0;j<(int)word.size();++j)
+			if (word[j]==par[i+j]) ++cnt;
+			else break;
+			if (cnt==(int)word.size())++val;
+		}
+		fin.close();
+
+		if(val) q.push_back({files_name[i],val});
+	}
+	vector<string> res;
+	res.clear();
+	//res is answer
+	for (int i=0;i<(int)q.size();++i)
+		for (int j=i+1;j<(int)q.size();++j)
+			if (q[i].num<q[j].num) swap(q[i],q[j]);
+	for(int i=0;i<min(5,(int)q.size());++i)
+		res.push_back(q[i].file);
+	for (int i=0;i<(int)res.size();++i)
+		cout<<res[i]<<"\n";
 }
 void System::process_unknown_word() {
-
+	string query=searchString;
+	vector<string> word;
+	word.clear();
+	query=" "+query;
+	for (auto it: query){
+		if (it==' ') word.push_back("");
+		else word.back()+=it;
+	}
+	int idx=0;
+	vector<string> file_name;
+	file_name.clear();
+	int ok=1;
+	for (int i=0;i<(int)word.size();++i){
+		if (word[i]=="*") {
+			idx=i;
+			continue;
+		}
+		if (stopwords[word[i]]) continue;
+		vector<string > tmp=root->get_files_from_word(word[i]);
+		if (ok){
+			ok=0;
+			file_name=tmp;
+			continue;
+		}
+		vector<string> sum;
+		sum.clear();
+		for (int j=0;j<(int)tmp.size();++j)
+			for (int k=0;k<(int)file_name.size();++k)
+			if(tmp[j]==file_name[k]){
+				sum.push_back(tmp[j]);
+				break;
+			}
+	}
+	if (file_name.size()==0) file_name=files;
+	vector<fn> q;
+	q.clear();
+	for (int i=0;i<(int)file_name.size();++i){
+		ifstream fin("data/Search Engine-Data/"+file_name[i]);
+		int val=0;
+		vector<string> par;
+		par.clear();
+		string sS;
+		while(fin>>sS) {
+			change(sS,0);
+			par.push_back(sS);
+		}
+		for (int i=0;i<(int)par.size();++i){
+			int cnt=0;
+			for (int j=0;j<(int)word.size();++j)
+			if (j==idx||word[j]==par[i+j]) ++cnt;
+			else break;
+			if (cnt==(int)word.size())++val;
+		}
+		fin.close();
+		q.push_back({file_name[i],val});
+	}
+	for (int i=0;i<(int)q.size();++i)
+		for (int j=i+1;j<(int)q.size();++j)
+			if (q[i].num<q[j].num) swap(q[i],q[j]);
+	vector<string > res;
+	res.clear();
+	//res is answer
+	for (int i=0;i<min(5,(int)q.size());++i)
+		res.push_back(q[i].file);
+	for (int i=0;i<(int)res.size();++i)
+		cout<<res[i]<<"\n";
 }
 void System::process_range_number() {
+	string query=searchString;
+	vector<string> word;
+	word.clear();
+	query=" "+query;
+	for (auto it: query){
+		if (it==' ') word.push_back("");
+		else word.back()+=it;
+	}
+	string beg="";
+	string aft="";
+	int idx=0;
+	for (int i=0;i<(int)word.size();++i){
+		int ok=0;
+		for (int j=0;j<(int)word[i].size();++j)
+			if (word[i][j]=='.') ok=1;
+		if (!ok) continue;
+		for (int j=0;j<(int)word[i].size();++j)
+		if (word[i][j]!='.') beg+=word[i][j];
+		else {
+			for (int k=j+2;k<(int)word[i].size();++k)
+				aft+=word[i][k];
+			break;
+		}
+		idx=i;
+		break;
+	}
+	int a=0;
+	for (int i=0;i<(int)beg.size();++i)
+		if (beg[i]>='0'&&beg[i]<='9') a=a*10+beg[i]-'0';
+	int b=0;
+	for (int i=0;i<(int)aft.size();++i)
+		if (aft[i]>='0'&&aft[i]<='9') b=b*10+aft[i]-'0';
+	vector<string> file_name;
+	file_name.clear();
+	map<string,int> dd;
+	dd.clear();
+	for (int i=a;i<=b;++i){
+		string tmp="";
+		int x=i;
+		while(x){
+			tmp=char(x%10+'0')+tmp;
+			x/=10;
+		}
+		if (beg[0]<'0'||beg[0]>'9') tmp=beg[0]+tmp;
+		vector<string > SS=root->get_files_from_word(tmp);
+		for (int i=0;i<(int)SS.size();++i){
+			if (dd[SS[i]]) continue;
+			dd[SS[i]]=1;
+			file_name.push_back(SS[i]);
+		}
+	}
+	for (int i=0;i<(int)word.size();++i){
+		if (i==idx) continue;
+		vector<string > th=root->get_files_from_word(word[i]);
+		vector<string > sum;
+		sum.clear();
+		for (int j=0;j<(int)th.size();++j)
+			for (int k=0;k<(int)file_name.size();++k)
+				if(file_name[k]==th[j]){
+					sum.push_back(file_name[k]);
+					break;
+				}
+		file_name=sum;
+	}
+	vector<fn > q;
+	q.clear();
+	for (int i=0;i<(int)file_name.size();++i){
+		int val=0;
+		ifstream fin("data/Search Engine-Data/"+file_name[i]);
+		string S;
+		while(fin>>S){
+			change(S,0);
+			for (int j=0;j<(int)word.size();++j){
+				if(word[j]==S)++val;
+				if(j==idx){
+					if(beg[0]>='0'&&beg[0]<='9'){
+						if(S[0]<'0'||S[0]>'9') continue;
+						int x=0;
+						for (int k=0;k<(int)S.size();++k)
+							x=x*10+S[k]-'0';
+						if(x>=a&&x<=b) ++val;
+					}else{
+						if (S[0]>='0'&&S[0]<='9') continue;
+						int x=0;
+						for (int k=1;k<(int)S.size();++k)
+							x=x*10+S[k]-'0';
+						if(x>=a&&x<=b) ++val;
+					}
+				}
+			}
+		}
+		fin.close();
+		q.push_back({file_name[i],val});
+	}
+	for (int i=0;i<(int)q.size();++i)
+		for (int j=i+1;j<(int)q.size();++j)
+			if (q[i].num<q[j].num) swap(q[i],q[j]);
+	vector<string > res;
+	res.clear();
+	//res is answer
+	for (int i=0;i<min(5,(int)q.size());++i)
+		res.push_back(q[i].file);
+	for (int i=0;i<(int)res.size();++i)
+		cout<<res[i]<<"\n";
 
 }
-void System::process_synonyms() {
 
+void System::load_synonym(){
+	ifstream fin("data/synonym.txt");
+	string query;
+	vector<string > xxx;
+	synonym.push_back(xxx);
+	while(getline(fin,query)){
+		vector<string> word;
+		word.clear();
+		query=" "+query;
+		for (auto it: query){
+			if (it==' ') word.push_back("");
+			else word.back()+=it;
+		}
+		while (word.back()=="") word.pop_back();
+		for (int i=0;i<(int)word.size();++i)
+			change(word[i],0);
+		for (auto it:word)
+			ID_synonym[it]=(int)synonym.size();
+		synonym.push_back(word);
+	}
+	fin.close();
+}
+
+void System::process_synonyms() {
+	string query=searchString;
+	query.erase(query.begin());
+	int id=ID_synonym[query];
+	vector<string > word;
+	word.clear();
+	if(id==0)	word.push_back(query);
+	else{
+		for (int i=0;i<(int)synonym[id].size();++i)
+			word.push_back(synonym[id][i]);
+	}
+	map<string,int> dd;
+	dd.clear();
+	vector<string> file_name;
+	file_name.clear();
+	for (int i=0;i<(int)word.size();++i){
+		vector<string> tmp=root->get_files_from_word(word[i]);
+		for (auto it: tmp){
+			if (dd[it]) continue;
+			dd[it]=1;
+			file_name.push_back(it);
+		}
+	}
+	vector<fn> q;
+	q.clear();
+	for (auto name: file_name){
+		ifstream fin("data/Search Engine-Data/"+name);
+		string s;
+		int val=0;
+		while(fin>>s){
+			for (auto x: word)
+			if(x==s){
+				++val;
+				break;
+			}
+		}
+		fin.close();
+		q.push_back({name,val});
+	}
+	for (int i=0;i<(int)q.size();++i)
+		for (int j=i+1;j<(int)q.size();++j)
+			if (q[i].num<q[j].num) swap(q[i],q[j]);
+	vector<string > res;
+	res.clear();
+	//res is answer
+	for (int i=0;i<min(5,(int)q.size());++i)
+		res.push_back(q[i].file);
+	for (int i=0;i<(int)res.size();++i)
+		cout<<res[i]<<"\n";
 }
 void System::history() {
 
 }
+
 
 void System::pushtoFrontEnd(vector<string> fileName, vector<string> titleName, vector<string> shortWord) {
 
