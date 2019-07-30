@@ -38,6 +38,15 @@ trie* System::get_root() {
 	return root;
 }
 
+int System::check_file(string s) {
+	for (int i = 0; i < (int)files.size(); ++i)
+	{
+		//cout << files[i] << endl;
+		if (s == files[i]) return i;
+	}
+	return -1;
+}
+
 void System::Find_keyword(ifstream &fin, vector<string> word) {
 	bool check = true;
 	for (int i = 0; i < (int)word.size(); i++)
@@ -68,6 +77,7 @@ void System::Find_keyword(ifstream &fin, vector<string> word) {
 		if (!check) break;
 	}
 	cout << "..." << endl;
+	cout << endl;
 }
 
 void System::Print(string filename, vector<string> word) {
@@ -79,7 +89,6 @@ void System::Print(string filename, vector<string> word) {
 	Find_keyword(fin, word);
 	fin.close();
 }
-
 void change(string &S, int is_query) {
 	if (!is_query) {
 		for (int i = 0; i < (int)S.size(); ++i)
@@ -175,7 +184,6 @@ void System::build_trie() {
 
 void System::Rank_files(int *check, vector<string> word) {
 	vector<string> wordfiles;
-	//int max = 0;
 	for (int i = 0; i < (int)word.size(); i++)
 	{
 		wordfiles = root->get_files_from_word(word[i]);
@@ -187,8 +195,8 @@ void System::Rank_up(int *check, vector<string> wordfiles)
 {
 	for (int i = 0; i < (int)wordfiles.size(); i++)
 	{
-		int id = root->check_link(wordfiles[i]);
-		if (id != -1) check[id]++;
+		int id = check_file(wordfiles[i]);
+		if (id != -1 && check[id] != -1) check[id]++;
 	}
 }
 
@@ -196,8 +204,8 @@ void System::Rank_down(int *check, vector<string> wordfiles)
 {
 	for (int i = 0; i < (int)wordfiles.size(); i++)
 	{
-		int id = root->check_link(wordfiles[i]);
-		if (id != -1) check[id]--;
+		int id = check_file(wordfiles[i]);
+		if (id != -1) check[id] = -1;
 	}
 }
 
@@ -228,17 +236,19 @@ vector<string> System::CutWord(string s, string type) {
 }
 
 void System::process_AND(string s) {
-	int check[15000]; for (int i = 0; i < 15000; i++) check[i] = 0;
+	int *check = new int[12000]; 
+	for (int i = 0; i < 12000; i++) check[i] = 0;
 
 	vector<string> word = CutWord(s, " and ");
 
 	Rank_files(check, word);
 
 	int co = 0;
-	for (int i = 0; i < 15000; i++)
+	for (int i = 0; i < 12000; i++)
 	{
-		if (check[i] == word.size()) {
+		if (check[i] >= (int)word.size()) {
 			co++;
+			cout << files[i] << endl;
 			Print(files[i], word);
 		}
 		if (co == 5) break;
@@ -247,7 +257,8 @@ void System::process_AND(string s) {
 
 void System::process_OR(string s) {
 
-	int check[15000]; for (int i = 0; i < 15000; i++) check[i] = 0;
+	int *check = new int[12000];
+	for (int i = 0; i < 100; i++) check[i] = 0;
 	vector<string> word = CutWord(s, " or ");
 
 	Rank_files(check, word);
@@ -255,20 +266,23 @@ void System::process_OR(string s) {
 
 	for (int co = 0; co < 5; co++)
 	{
-		int max = 0, index_max;
-		for (int i = 0; i < 15000; i++)
+		int max = 0, index_max = -1;
+		for (int i = 0; i < 12000; i++)
 			if (check[i] > max)
 			{
 				max = check[i];
 				index_max = i;
 			}
-		check[index_max] = -1;
-		Print(files[index_max], word);
+		if (index_max != -1) {
+			check[index_max] = -1;
+			Print(files[index_max], word);
+		}
 	}
 }
 
 void System::process_minus(string s) {
-	int check[15000]; for (int i = 0; i < 15000; i++) check[i] = 0;
+	int *check = new int[12000];
+	for (int i = 0; i < 12000; i++) check[i] = 0;
 	//get first and second word from query
 	vector<string> word = CutWord(s, " -");
 	//get all files thats have i word
@@ -292,18 +306,19 @@ void System::process_minus(string s) {
 	}
 	for (int co = 0; co < 5; co++)
 	{
-		int max = 0, index_max;
-		for (int i = 0; i < 15000; i++)
+		int max = 0, index_max = -1;
+		for (int i = 0; i < 12000; i++)
 			if (check[i] > max)
 			{
 				max = check[i];
 				index_max = i;
 			}
-		check[index_max] = -1;
-		Print(files[index_max], keyword);
+		if (index_max != -1) {
+			check[index_max] = -1;
+			Print(files[index_max], word);
+		}
 	}
 }
-
 void checkTitle(string word, vector<string> titles, int* check) {
 	for (int i = 0; i < (int)titles.size(); i++)
 	{
@@ -382,15 +397,16 @@ void System::process_intitle(string s) {
 }
 
 void System::process_plus(string s) {
-	int check[15000]; for (int i = 0; i < 15000; i++) check[i] = 0;
+	int *check = new int[12000];
+	for (int i = 0; i < 12000; i++) check[i] = 0;
 	vector<string> word = CutWord(s, " +");
 
 	Rank_files(check, word);
 
 	int co = 0;
-	for (int i = 0; i < 15000; i++)
+	for (int i = 0; i < 12000; i++)
 	{
-		if (check[i] == word.size()) {
+		if (check[i] >= (int) word.size()) {
 			co++;
 			Print(files[i], word);
 		}
