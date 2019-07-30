@@ -227,7 +227,7 @@ vector<string> System::CutWord(string s, string type) {
 void System::process_AND(string s) {
 	int check[15000]; for (int i = 0; i < 15000; i++) check[i] = 0;
 
-	vector<string> word = CutWord(s, " AND ");
+	vector<string> word = CutWord(s, " and ");
 
 	Rank_files(check, word);
 
@@ -245,7 +245,7 @@ void System::process_AND(string s) {
 void System::process_OR(string s) {
 
 	int check[15000]; for (int i = 0; i < 15000; i++) check[i] = 0;
-	vector<string> word = CutWord(s, " OR ");
+	vector<string> word = CutWord(s, " or ");
 
 	Rank_files(check, word);
 
