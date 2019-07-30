@@ -36,8 +36,8 @@ public:
 	//void get_files_name();//done
 	void InputFiles();
 	int check_file(string s);
-	void Find_keyword(ifstream &fin, vector<string> word);
-	void Print(string filename, vector<string> word);
+	string Find_keyword(ifstream &fin, vector<string> word);
+	string Print(string filename, vector<string> word);
 
 	string getSearch();
 	void inputSearch();
