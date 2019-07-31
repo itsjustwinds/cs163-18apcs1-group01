@@ -49,10 +49,8 @@ int System::check_file(string s) {
 
 string System::Find_keyword(ifstream &fin, vector<string> word) {
 	//bool check = true;
-	for (int i = 0; i < (int)word.size(); i++)
-	{
-		string key = " " + word[i] + " ";
-		string read; //cout << "...";
+		string read; //cout << "..."; 
+		getline(fin, read);
 		while (!fin.eof()) {
 			getline(fin, read);
 			read = " " + read + " ";
@@ -62,35 +60,39 @@ string System::Find_keyword(ifstream &fin, vector<string> word) {
 				if ((read[i] >= '!' && read[i] <= '/') || (read[i] >= ':' && read[i] <= '@') || (read[i] >= '[' && read[i] <= '-') || (read[i] >= '{' && read[i] <= '~'))
 					read[i] = ' ';
 			}
-			int pos = read.find(key);
-			if (pos != -1) {
-				/* if ((int)read.size() < 250) cout << str; else {
-					if (pos < 100) pos = 0; else pos = pos - 100;
-					for (int w = pos; (w < pos + 200) && (w < (int)str.size()); w++)
-						cout << str[w]; */
-				return read;
-				//}
-				//check = false;
-				//break;
+			for (int i = 0; i < (int)word.size(); i++) {
+				string key = " " + word[i] + " ";
+				int pos = read.find(key);
+				if (pos != -1) {
+					if ((int)str.size() < 300) return "..." + str + "..."; else {
+						if (pos <= 100) pos = 0; else pos = pos - 100;
+						str.erase(0, pos);
+						if (str.size() > 300) str.erase(299, read.size() - 299);
+						return "..." + str + "...";
+					}
+					//check = false;
+					//break;
+				}
 			}
 			//if (!check) break;
 		}
 		//if (!check) break;
-	}
 	//cout << "..." << endl;
 	//cout << endl;
 }
 
 vector<string> System::Print(string filename, vector<string> word) {
-	ifstream fin;
+	ifstream fin; vector<string> ans_tmp;
 	fin.open("data/Search Engine-Data/" + filename);
-	string Title; vector<string> ans_tmp;
-	getline(fin, Title);
-	ans_tmp.push_back(Title);
-	string keystr = Find_keyword(fin, word);
-	ans_tmp.push_back(keystr);
-	fin.close();
-	return ans_tmp;
+	if (fin.is_open()) {
+		string Title; 
+		getline(fin, Title);
+		ans_tmp.push_back(Title);
+		string keystr = Find_keyword(fin, word);
+		ans_tmp.push_back(keystr);
+		fin.close();
+	}
+	return ans_tmp; 
 }
 
 void change(string &S,int is_query){
@@ -263,15 +265,21 @@ void System::process_AND(string s) {
 	for (int i = 0; i < (int)ans.size(); i++)
 	{
 		vector<string> tmp = Print(ans[i], word);
-		ans_key.push_back(tmp[0]);
-		ans_Title.push_back(tmp[1]);
+		ans_Title.push_back(tmp[0]);
+		ans_key.push_back(tmp[1]);
 	}
+	delete[]check;
+	/* for (int i = 0; i < (int)ans.size(); i++)
+	{
+		cout << ans_Title[i] << endl << endl;
+		cout << ans_key[i] << endl << endl;
+	} */
 }
 
 void System::process_OR(string s) {
 
 	int *check = new int[12000];
-	for (int i = 0; i < 100; i++) check[i] = 0;
+	for (int i = 0; i < 12000; i++) check[i] = 0;
 	vector<string> word = CutWord(s, " or ");
 
 	Rank_files(check, word);
@@ -286,24 +294,32 @@ void System::process_OR(string s) {
 				max = check[i];
 				index_max = i;
 			}
-		if (index_max != -1) {
+		if (max > 0) {
 			check[index_max] = -1;
 			ans.push_back(files[index_max]);
 		}
+		else break;
+
 	}
 
 	vector<string> ans_key; vector<string> ans_Title;
 	for (int i = 0; i < (int)ans.size(); i++)
 	{
 		vector<string> tmp = Print(ans[i], word);
-		ans_key.push_back(tmp[0]);
-		ans_Title.push_back(tmp[1]);
+		ans_Title.push_back(tmp[0]);
+		ans_key.push_back(tmp[1]);
 	}
+	delete[]check;
+	/* for (int i = 0; i < (int)ans.size(); i++)
+	{
+		cout << ans_Title[i] << endl << endl;
+		cout << ans_key[i] << endl << endl;
+	} */
 }
 
 void System::process_minus(string s) {
 	int *check = new int[12000];
-	for (int i = 0; i < 12000; i++) check[i] = 0;
+	for (int i = 0; i < 100; i++) check[i] = 0;
 	//get first and second word from query
 	vector<string> word = CutWord(s, " -");
 	//get all files thats have i word
@@ -330,13 +346,13 @@ void System::process_minus(string s) {
 	for (int co = 0; co < 5; co++)
 	{
 		int max = 0, index_max = -1;
-		for (int i = 0; i < 12000; i++)
+		for (int i = 0; i < 50; i++)
 			if (check[i] > max)
 			{
 				max = check[i];
 				index_max = i;
 			}
-		if (index_max != -1) {
+		if (max > 0) {
 			check[index_max] = -1;
 			ans.push_back(files[index_max]);
 		}
@@ -345,10 +361,16 @@ void System::process_minus(string s) {
 	vector<string> ans_key; vector<string> ans_Title;
 	for (int i = 0; i < (int)ans.size(); i++)
 	{
-		vector<string> tmp = Print(ans[i], word);
-		ans_key.push_back(tmp[0]);
-		ans_Title.push_back(tmp[1]);
+		vector<string> tmp = Print(ans[i], keyword);
+		ans_Title.push_back(tmp[0]);
+		ans_key.push_back(tmp[1]);
 	}
+	delete[]check;
+	/* for (int i = 0; i < (int)ans.size(); i++)
+	{
+		cout << ans_Title[i] << endl << endl;
+		cout << ans_key[i] << endl << endl;
+	} */
 }
 
 void checkTitle(string word, vector<string> titles, int* check) {
@@ -455,9 +477,15 @@ void System::process_plus(string s) {
 	for (int i = 0; i < (int)ans.size(); i++)
 	{
 		vector<string> tmp = Print(ans[i], word);
-		ans_key.push_back(tmp[0]);
-		ans_Title.push_back(tmp[1]);
+		ans_Title.push_back(tmp[0]);
+		ans_key.push_back(tmp[1]);
 	}
+	delete[]check;
+	/* for (int i = 0; i < (int)ans.size(); i++)
+	{
+		cout << ans_Title[i] << endl << endl;
+		cout << ans_key[i] << endl << endl;
+	} */
 }
 
 void System::process_type(string s) {
